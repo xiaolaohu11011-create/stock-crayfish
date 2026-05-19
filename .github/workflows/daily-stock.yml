@@ -38,7 +38,7 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
-      - name: 判断运行模式
+      - name: 判断运行模式 + 是否 mock
         id: pick-mode
         run: |
           if [ "${{ github.event_name }}" = "schedule" ]; then
@@ -47,21 +47,25 @@ jobs:
             if [ "$HOUR" = "01" ]; then
               echo "mode=selection" >> $GITHUB_OUTPUT
               echo "label=综合选股(09:45)" >> $GITHUB_OUTPUT
+              echo "mock=" >> $GITHUB_OUTPUT
             elif [ "$HOUR" = "06" ]; then
               echo "mode=overnight" >> $GITHUB_OUTPUT
               echo "label=隔夜套利(14:45)" >> $GITHUB_OUTPUT
+              echo "mock=" >> $GITHUB_OUTPUT
             else
               echo "mode=selection" >> $GITHUB_OUTPUT
               echo "label=综合选股(默认)" >> $GITHUB_OUTPUT
+              echo "mock=" >> $GITHUB_OUTPUT
             fi
           else
-            # 手动触发：使用用户选择的模式
+            # 手动触发：使用用户选择的模式，强制 mock（方便测试）
             echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
-            echo "label=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+            echo "label=${{ github.event.inputs.mode }} (测试)" >> $GITHUB_OUTPUT
+            echo "mock=--mock" >> $GITHUB_OUTPUT
           fi
 
       - name: 运行选股（${{ steps.pick-mode.outputs.label }}）
-        run: python main.py --mode ${{ steps.pick-mode.outputs.mode }}
+        run: python main.py --mode ${{ steps.pick-mode.outputs.mode }} ${{ steps.pick-mode.outputs.mock }}
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
           PYTHONIOENCODING: utf-8
