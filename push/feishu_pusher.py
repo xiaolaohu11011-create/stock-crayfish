@@ -30,6 +30,9 @@ def push_to_feishu(content: str, webhook_url: str = None) -> bool:
         logger.warning("FEISHU_WEBHOOK_URL 未配置，跳过飞书推送")
         return False
 
+    # 飞书安全关键词：必须出现在消息中才能通过验证
+    SAFE_KEYWORD = "小可爱"
+
     payload = {
         "msg_type": "interactive",
         "card": {
@@ -40,7 +43,7 @@ def push_to_feishu(content: str, webhook_url: str = None) -> bool:
             "elements": [
                 {
                     "tag": "markdown",
-                    "content": content
+                    "content": f"**{SAFE_KEYWORD}**\n\n{content}"
                 }
             ]
         }
