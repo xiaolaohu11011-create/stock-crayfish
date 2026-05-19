@@ -2,9 +2,21 @@ name: 选股小龙虾 - 每日自动选股
 
 on:
   schedule:
-    # 周一到周五，北京时间 09:45（UTC 01:45）开盘后推送
+    # 周一到周五，北京时间 09:45（UTC 01:45）开盘后综合选股
     - cron: '45 1 * * 1-5'
+    # 周一到周五，北京时间 14:45（UTC 06:45）收盘前隔夜套利
+    - cron: '45 6 * * 1-5'
   workflow_dispatch:  # 支持手动触发
+    inputs:
+      mode:
+        description: 运行模式
+        required: false
+        default: 'selection'
+        type: choice
+        options:
+          - selection
+          - overnight
+          - full
 
 permissions:
   contents: read
@@ -26,8 +38,30 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
-      - name: 运行综合选股（实盘模式）
-        run: python main.py --mode selection --no-push
+      - name: 判断运行模式
+        id: pick-mode
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # 定时触发：根据 UTC 时间判断
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" = "01" ]; then
+              echo "mode=selection" >> $GITHUB_OUTPUT
+              echo "label=综合选股(09:45)" >> $GITHUB_OUTPUT
+            elif [ "$HOUR" = "06" ]; then
+              echo "mode=overnight" >> $GITHUB_OUTPUT
+              echo "label=隔夜套利(14:45)" >> $GITHUB_OUTPUT
+            else
+              echo "mode=selection" >> $GITHUB_OUTPUT
+              echo "label=综合选股(默认)" >> $GITHUB_OUTPUT
+            fi
+          else
+            # 手动触发：使用用户选择的模式
+            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+            echo "label=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 运行选股（${{ steps.pick-mode.outputs.label }}）
+        run: python main.py --mode ${{ steps.pick-mode.outputs.mode }} --no-push
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
           PYTHONIOENCODING: utf-8
@@ -35,6 +69,6 @@ jobs:
       - name: 上传选股报告
         uses: actions/upload-artifact@v4
         with:
-          name: stock-report-${{ github.run_number }}
+          name: stock-report-${{ steps.pick-mode.outputs.mode }}-${{ github.run_number }}
           path: output/
           retention-days: 30
