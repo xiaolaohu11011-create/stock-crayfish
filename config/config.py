@@ -110,6 +110,9 @@ WXPUSHER_UID = os.environ.get("WXPUSHER_UID", "")
 # 企业微信机器人
 WECHAT_WEBHOOK_URL = os.environ.get("WECHAT_WEBHOOK_URL", "")
 
+# 飞书 Webhook（GitHub Actions 云端推送用）
+FEISHU_WEBHOOK_URL = os.environ.get("FEISHU_WEBHOOK_URL", "")
+
 
 # ==================== 输出配置 ====================
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "output")

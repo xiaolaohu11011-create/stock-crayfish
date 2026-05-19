@@ -37,7 +37,8 @@ from strategy.locked_chips import batch_analyze_locked_chips
 from strategy.market_analysis import analyze_market
 from report.docx_generator import generate_selection_report, generate_overnight_report
 from push.wechat_pusher import push_report, push_overnight_report, save_to_queue
-from config.config import OUTPUT_DIR, LOG_DIR, TOP_N, PUSH_QUEUE_FILE
+from push.feishu_pusher import push_report_feishu
+from config.config import OUTPUT_DIR, LOG_DIR, TOP_N, PUSH_QUEUE_FILE, FEISHU_WEBHOOK_URL
 
 
 def setup_script_logging(script_name: str) -> logging.Logger:
@@ -322,8 +323,13 @@ def push_and_queue(
     
     if report_type == "selection":
         push_report(report_path, market_score, top_stocks)
+        # 飞书推送（GitHub Actions 云端走这里）
+        if FEISHU_WEBHOOK_URL:
+            push_report_feishu(top_stocks or [], report_path)
     elif report_type == "overnight":
         push_overnight_report(report_path, top_stocks)
+        if FEISHU_WEBHOOK_URL:
+            push_report_feishu(top_stocks or [], report_path)
     
     save_to_queue({
         "type": report_type,

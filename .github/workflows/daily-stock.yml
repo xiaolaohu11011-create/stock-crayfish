@@ -2,8 +2,8 @@ name: 选股小龙虾 - 每日自动选股
 
 on:
   schedule:
-    # 周一到周五，北京时间 14:45（UTC 06:45）收盘前触发
-    - cron: '45 6 * * 1-5'
+    # 周一到周五，北京时间 09:45（UTC 01:45）开盘后推送
+    - cron: '45 1 * * 1-5'
   workflow_dispatch:  # 支持手动触发
 
 permissions:
@@ -26,9 +26,10 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
-      - name: 运行选股（Mock模式验证）
-        run: python main.py --mock
+      - name: 运行综合选股（实盘模式）
+        run: python main.py --mode selection --no-push
         env:
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
           PYTHONIOENCODING: utf-8
 
       - name: 上传选股报告
