@@ -1,0 +1,39 @@
+name: 选股小龙虾 - 每日自动选股
+
+on:
+  schedule:
+    # 周一到周五，北京时间 14:45（UTC 06:45）收盘前触发
+    - cron: '45 6 * * 1-5'
+  workflow_dispatch:  # 支持手动触发
+
+permissions:
+  contents: read
+
+jobs:
+  stock-picker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 运行选股（Mock模式验证）
+        run: python main.py --mock
+        env:
+          PYTHONIOENCODING: utf-8
+
+      - name: 上传选股报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-report-${{ github.run_number }}
+          path: output/
+          retention-days: 30

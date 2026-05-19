@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# 缓存数据（大文件，不提交）
+data/.cache/
+
+# 日志
+logs/*.log
+
+# 输出文件（报告、JSON等）
+output/*
+!output/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Windows
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 环境配置
+.env
+.env.local
+
+# 测试脚本（临时调试用）
+test_*.py
+check_result.py
+compare_scoring.py
+tests.py
+
+# 临时/中间文件
+task_summary_*.md
+crontab.txt
+start_server.py
