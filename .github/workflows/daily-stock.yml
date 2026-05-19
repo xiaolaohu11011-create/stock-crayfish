@@ -61,7 +61,7 @@ jobs:
           fi
 
       - name: 运行选股（${{ steps.pick-mode.outputs.label }}）
-        run: python main.py --mode ${{ steps.pick-mode.outputs.mode }} --no-push
+        run: python main.py --mode ${{ steps.pick-mode.outputs.mode }}
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
           PYTHONIOENCODING: utf-8
