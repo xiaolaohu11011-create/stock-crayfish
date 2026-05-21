@@ -41,3 +41,6 @@ tests.py
 task_summary_*.md
 crontab.txt
 start_server.py
+
+# 本地推送目录
+push/
